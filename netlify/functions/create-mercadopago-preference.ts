@@ -27,8 +27,8 @@ const handler: Handler = async (event) => {
         quantity: Number(item.quantity),
       })),
       back_urls: {
-        success: `${process.env.URL}/success`,
-        failure: `${process.env.URL}/failure`,
+        success: "https://stripecartopia.netlify.app/success",
+        failure: "https://stripecartopia.netlify.app/failure",
       },
       auto_return: "approved",
     };
