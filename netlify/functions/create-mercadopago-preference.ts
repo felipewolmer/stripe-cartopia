@@ -18,6 +18,10 @@ const handler: Handler = async (event) => {
       throw new Error('MERCADOPAGO_ACCESS_TOKEN is not configured');
     }
 
+    if (!process.env.MERCADOPAGO_PUBLIC_KEY) {
+      throw new Error('MERCADOPAGO_PUBLIC_KEY is not configured');
+    }
+
     const { items } = JSON.parse(event.body || '{}');
 
     if (!items || !Array.isArray(items) || items.length === 0) {
