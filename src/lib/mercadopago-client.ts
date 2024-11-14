@@ -1,8 +1,12 @@
 import { loadMercadoPago } from "@mercadopago/sdk-js";
 
+interface MercadoPagoInstance {
+  init: (config: { publicKey: string }) => Promise<void>;
+}
+
 export const initMercadoPago = async () => {
   try {
-    const mp = await loadMercadoPago();
+    const mp = await loadMercadoPago() as MercadoPagoInstance;
     if (!mp || typeof mp.init !== 'function') {
       throw new Error('Failed to initialize MercadoPago SDK');
     }
