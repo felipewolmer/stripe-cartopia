@@ -14,12 +14,20 @@ const handler: Handler = async (event) => {
   }
 
   try {
+    if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
+      throw new Error('MERCADOPAGO_ACCESS_TOKEN is not configured');
+    }
+
     const { items } = JSON.parse(event.body || '{}');
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      throw new Error('Invalid items data');
+    }
 
     const preference = {
       items: items.map((item: any) => ({
         title: item.name,
-        unit_price: item.price,
+        unit_price: Number(item.price),
         quantity: item.quantity,
         currency_id: 'BRL',
         picture_url: item.image,
@@ -32,7 +40,11 @@ const handler: Handler = async (event) => {
       auto_return: 'approved',
     };
 
+    console.log('Creating Mercado Pago preference:', JSON.stringify(preference));
+
     const response = await mercadopago.preferences.create(preference);
+
+    console.log('Mercado Pago response:', JSON.stringify(response.body));
 
     return {
       statusCode: 200,
@@ -41,11 +53,14 @@ const handler: Handler = async (event) => {
         initPoint: response.body.init_point 
       }),
     };
-  } catch (error) {
-    console.error('Error:', error);
+  } catch (error: any) {
+    console.error('Error creating Mercado Pago preference:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: 'Internal server error' }),
+      body: JSON.stringify({ 
+        message: 'Error creating payment preference',
+        error: error.message 
+      }),
     };
   }
 };
