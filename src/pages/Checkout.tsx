@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/components/ui/use-toast";
 import { stripe } from "@/lib/stripe-client";
+import { createPreference } from "@/lib/mercadopago-client";
 
 const CheckoutForm = () => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +14,26 @@ const CheckoutForm = () => {
   const { clearCart, items, total } = useCart();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleMercadoPago = async () => {
+    setLoading(true);
+    try {
+      const { init_point } = await createPreference(items);
+      if (init_point) {
+        window.location.href = init_point;
+      }
+    } catch (error) {
+      console.error('Error with MercadoPago:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro no pagamento",
+        description: "Ocorreu um erro ao processar seu pagamento com Mercado Pago",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStripeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -68,8 +88,8 @@ const CheckoutForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
+    <div className="space-y-6">
+      <form onSubmit={handleStripeSubmit} className="space-y-4">
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium">
             Email
@@ -81,15 +101,36 @@ const CheckoutForm = () => {
             required
           />
         </div>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loading || items.length === 0}
+        >
+          {loading ? "Processando..." : "Pagar com Stripe"}
+        </Button>
+      </form>
+      
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-muted-foreground">
+            Ou pague com
+          </span>
+        </div>
       </div>
+
       <Button
-        type="submit"
+        type="button"
+        variant="outline"
         className="w-full"
+        onClick={handleMercadoPago}
         disabled={loading || items.length === 0}
       >
-        {loading ? "Processando..." : "Finalizar Compra"}
+        {loading ? "Processando..." : "Pagar com Mercado Pago"}
       </Button>
-    </form>
+    </div>
   );
 };
 
