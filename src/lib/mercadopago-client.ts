@@ -15,15 +15,43 @@ export const initMercadoPago = async (): Promise<MercadoPagoSDK> => {
     }
     
     const mp = await loadMercadoPago();
-    await mp.configure({
-      locale: 'pt-BR',
-      advancedFraudPrevention: true,
-      publicKey: publicKey
-    });
-    
+    if (!mp) {
+      throw new Error('Falha ao carregar SDK do Mercado Pago');
+    }
+
     return mp as MercadoPagoSDK;
   } catch (error) {
     console.error('Erro ao inicializar MercadoPago:', error);
+    throw error;
+  }
+};
+
+export const createPreference = async (items: Array<{ 
+  name: string; 
+  quantity: number; 
+  price: number;
+  image?: string;
+}>) => {
+  try {
+    const response = await fetch('/.netlify/functions/create-mercadopago-preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao criar preferência de pagamento');
+    }
+
+    const data = await response.json();
+    
+    if (!data.initPoint) {
+      throw new Error('URL de pagamento não encontrada na resposta');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Erro ao criar preferência:', error);
     throw error;
   }
 };
