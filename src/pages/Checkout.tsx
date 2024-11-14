@@ -3,15 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Elements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/components/ui/use-toast";
 import { stripe } from "@/lib/stripe-client";
 
 const CheckoutForm = () => {
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("stripe");
   const navigate = useNavigate();
   const { clearCart, items, total } = useCart();
   const { toast } = useToast();
@@ -21,64 +18,39 @@ const CheckoutForm = () => {
     setLoading(true);
 
     try {
-      if (paymentMethod === "stripe") {
-        const response = await fetch("/.netlify/functions/create-checkout-session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: items.map(item => ({
-              id: item.id,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              image: item.image,
-            })),
-          }),
-        });
+      const response = await fetch("/.netlify/functions/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            image: item.image,
+          })),
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Erro ao criar sessão de pagamento");
-        }
+      if (!response.ok) {
+        throw new Error("Erro ao criar sessão de pagamento");
+      }
 
-        const { sessionId } = await response.json();
-        const stripeInstance = await stripe;
-        
-        if (!stripeInstance) {
-          throw new Error("Erro ao carregar Stripe");
-        }
+      const { sessionId } = await response.json();
+      const stripeInstance = await stripe;
+      
+      if (!stripeInstance) {
+        throw new Error("Erro ao carregar Stripe");
+      }
 
-        const { error } = await stripeInstance.redirectToCheckout({
-          sessionId,
-        });
+      const { error } = await stripeInstance.redirectToCheckout({
+        sessionId,
+      });
 
-        if (error) {
-          throw error;
-        }
-      } else if (paymentMethod === "mercadopago") {
-        const response = await fetch("/.netlify/functions/create-mercadopago-preference", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: items.map(item => ({
-              id: item.id,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              image: item.image,
-            })),
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Erro ao criar preferência do Mercado Pago");
-        }
-
-        const { initPoint } = await response.json();
-        window.location.href = initPoint;
+      if (error) {
+        throw error;
       }
 
       clearCart();
@@ -108,25 +80,6 @@ const CheckoutForm = () => {
             placeholder="seu@email.com"
             required
           />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Método de Pagamento
-          </label>
-          <RadioGroup
-            defaultValue="stripe"
-            onValueChange={setPaymentMethod}
-            className="flex flex-col space-y-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="stripe" id="stripe" />
-              <Label htmlFor="stripe">Cartão de Crédito (Stripe)</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="mercadopago" id="mercadopago" />
-              <Label htmlFor="mercadopago">Mercado Pago</Label>
-            </div>
-          </RadioGroup>
         </div>
       </div>
       <Button
