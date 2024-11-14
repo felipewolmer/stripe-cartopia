@@ -1,11 +1,8 @@
-import { loadMercadoPago, MercadoPago } from "@mercadopago/sdk-js";
+import { loadMercadoPago } from "@mercadopago/sdk-js";
 
 export const initMercadoPago = async () => {
   try {
-    await loadMercadoPago();
-    const mp = new MercadoPago(process.env.MERCADOPAGO_PUBLIC_KEY || '', {
-      locale: 'pt-BR'
-    });
+    const mp = await loadMercadoPago();
     return mp;
   } catch (error) {
     console.error('Error initializing MercadoPago:', error);
