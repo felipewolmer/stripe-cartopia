@@ -1,28 +1,23 @@
 import { loadMercadoPago } from "@mercadopago/sdk-js";
 
-interface MercadoPagoInstance {
-  init: (config: { publicKey: string }) => Promise<void>;
-}
-
 export const initMercadoPago = async () => {
   try {
-    const mp = await loadMercadoPago() as MercadoPagoInstance;
-    if (!mp || typeof mp.init !== 'function') {
-      throw new Error('Failed to initialize MercadoPago SDK');
-    }
-    
     const publicKey = process.env.MERCADOPAGO_PUBLIC_KEY;
     if (!publicKey) {
-      throw new Error('MERCADOPAGO_PUBLIC_KEY is not configured');
+      throw new Error('MERCADOPAGO_PUBLIC_KEY não configurada');
     }
-
+    
+    await loadMercadoPago();
+    const mp = await loadMercadoPago();
     await mp.init({
+      locale: 'pt-BR',
+      advancedFraudPrevention: true,
       publicKey: publicKey
     });
     
     return mp;
   } catch (error) {
-    console.error('Error initializing MercadoPago:', error);
+    console.error('Erro ao inicializar MercadoPago:', error);
     throw error;
   }
 };

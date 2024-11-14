@@ -6,19 +6,19 @@ const products = [
     id: "1",
     name: "Produto 1",
     price: 299.99,
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
   },
   {
     id: "2",
     name: "Produto 2",
     price: 199.99,
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
   },
   {
     id: "3",
     name: "Produto 3",
     price: 399.99,
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
   },
 ];
 
