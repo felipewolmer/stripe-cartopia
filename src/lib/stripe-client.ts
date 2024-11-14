@@ -1,7 +1,12 @@
 import { loadStripe } from "@stripe/stripe-js";
 
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error("Missing VITE_STRIPE_PUBLIC_KEY");
-}
+const getStripePublicKey = () => {
+  const key = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+  if (!key) {
+    console.error("Stripe public key not found. Please set VITE_STRIPE_PUBLIC_KEY in your environment variables.");
+    return "pk_test_dummy"; // This will cause Stripe to fail gracefully with a proper error message
+  }
+  return key;
+};
 
-export const stripe = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+export const stripe = loadStripe(getStripePublicKey());
