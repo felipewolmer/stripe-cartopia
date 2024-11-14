@@ -2,9 +2,9 @@ import { loadMercadoPago } from "@mercadopago/sdk-js";
 
 export const initMercadoPago = async () => {
   try {
-    const mercadopago = await loadMercadoPago();
-    const mp = await mercadopago.create({
-      publicKey: process.env.MERCADOPAGO_PUBLIC_KEY || ''
+    await loadMercadoPago();
+    const mp = new MercadoPago(process.env.MERCADOPAGO_PUBLIC_KEY || '', {
+      locale: 'pt-BR'
     });
     return mp;
   } catch (error) {
