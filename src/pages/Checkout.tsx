@@ -1,54 +1,58 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/components/ui/use-toast";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+import { stripe } from "@/lib/stripe-client";
 
 const CheckoutForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { clearCart } = useCart();
+  const { clearCart, items, total } = useCart();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/success`,
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao criar sessão de pagamento");
+      }
+
+      const { sessionId } = await response.json();
+      const stripeInstance = await stripe;
+      
+      if (!stripeInstance) {
+        throw new Error("Erro ao carregar Stripe");
+      }
+
+      const { error } = await stripeInstance.redirectToCheckout({
+        sessionId,
       });
 
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro no pagamento",
-          description: error.message,
-        });
-      } else {
-        clearCart();
-        navigate("/success");
+        throw error;
       }
+
+      clearCart();
+      navigate("/success");
     } catch (err) {
       console.error("Erro ao processar pagamento:", err);
       toast({
@@ -75,14 +79,13 @@ const CheckoutForm = () => {
             required
           />
         </div>
-        <PaymentElement />
       </div>
       <Button
         type="submit"
         className="w-full"
-        disabled={!stripe || loading}
+        disabled={loading || items.length === 0}
       >
-        {loading ? "Processando..." : "Pagar"}
+        {loading ? "Processando..." : "Finalizar Compra"}
       </Button>
     </form>
   );
@@ -121,7 +124,7 @@ const Checkout = () => {
             </p>
           </div>
           <div className="rounded-lg border bg-white p-6">
-            <Elements stripe={stripePromise}>
+            <Elements stripe={stripe}>
               <CheckoutForm />
             </Elements>
           </div>
