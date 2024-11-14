@@ -11,8 +11,13 @@ export const initMercadoPago = async () => {
       throw new Error('Failed to initialize MercadoPago SDK');
     }
     
+    const publicKey = process.env.MERCADOPAGO_PUBLIC_KEY;
+    if (!publicKey) {
+      throw new Error('MERCADOPAGO_PUBLIC_KEY is not configured');
+    }
+
     await mp.init({
-      publicKey: process.env.MERCADOPAGO_PUBLIC_KEY || ''
+      publicKey: publicKey
     });
     
     return mp;
