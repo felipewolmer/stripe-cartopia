@@ -4,6 +4,20 @@
 
 **URL**: https://lovable.dev/projects/da080b94-ba71-41a0-b439-a45b57c5cb59
 
+## Como fazer deploy no Netlify
+
+1. Acesse [Netlify](https://netlify.com) e faça login
+2. Clique em "Add new site" > "Deploy manually"
+3. Arraste a pasta do projeto ou clique para fazer upload
+4. Importante: Configure as variáveis de ambiente:
+   - Vá em "Site settings" > "Environment variables"
+   - Adicione STRIPE_SECRET_KEY com sua chave secreta do Stripe
+
+## Configurações de Build
+- Build command: npm run build
+- Publish directory: dist
+- Node version: 18 (ou superior)
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
