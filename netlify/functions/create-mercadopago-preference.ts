@@ -1,8 +1,8 @@
 import { Handler } from '@netlify/functions';
 import MercadoPago from 'mercadopago';
 
-const mercadopago = new MercadoPago(process.env.MERCADOPAGO_ACCESS_TOKEN || '', {
-  locale: 'pt-BR'
+const mercadopago = new MercadoPago({
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
 });
 
 const handler: Handler = async (event) => {
