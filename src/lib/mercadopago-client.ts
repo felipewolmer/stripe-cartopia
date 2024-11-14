@@ -1,4 +1,4 @@
-import { loadMercadoPago } from "@mercadopago/sdk-js";
+import { loadMercadoPago, MercadoPago } from "@mercadopago/sdk-js";
 
 export const initMercadoPago = async () => {
   try {
